@@ -3,6 +3,7 @@ local Player = require("player") -- charge player.lua
 local player
 
 function love.load()
+    player = Player.new(100, 100) -- x, y
 end
 
 function love.update(dt)
