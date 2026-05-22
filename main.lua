@@ -1,3 +1,13 @@
+local Player = require("player") -- charge player.lua
+
+local player
+
+function love.update(dt)
+    -- player update
+    Player.update(player, dt)
+end
+
 function love.draw()
-    love.graphics.print("Wendy's Gone", 100, 100)
+    -- player draw
+    Player.draw(player)
 end
