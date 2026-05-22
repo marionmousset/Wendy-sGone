@@ -15,3 +15,13 @@ function love.draw()
     -- player draw
     Player.draw(player)
 end
+
+function love.keypressed(key)
+    if key == "e" then
+        Player.interaction(player)
+    end
+
+    if key == "space" then
+        Player.shoot(player)
+    end
+end
