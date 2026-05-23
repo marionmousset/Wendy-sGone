@@ -8,6 +8,7 @@ function Enemy()
         x = 10,
         y = 50,
         speed = 50,
+        img = love.graphics.newImage("enemy.png"),
 
         move = function (self, player_x, player_y, dt)
             if player_x - self.x > 0 then
@@ -25,9 +26,9 @@ function Enemy()
 
         draw = function (self)
             if self.life > 0 then
-                love.graphics.setColor(1, 0.5, 0.7)
-                love.graphics.circle("fill", self.x, self.y, self.radius)
-                love.graphics.setColor(1, 1, 1)
+                local scaleX = 64 / self.img:getWidth()
+                local scaleY = 64 / self.img:getHeight()
+                love.graphics.draw(self.img, self.x, self.y, 0, scaleX, scaleY, self.img:getWidth()/2, self.img:getHeight()/2)
             end
         end,
 

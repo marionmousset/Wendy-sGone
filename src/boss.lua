@@ -6,8 +6,8 @@ local Boss = {
     level = 1,
     radius = 30,
     life = 50,
-    x = 50,
-    y = 50,
+    x = 940,
+    y = 200,
     speed = 100,
     active = false,
     bones = {},
@@ -18,11 +18,15 @@ local Boss = {
     boneIntervals = { 1.9, 1.7, 1.5, 1, 0.5 },
     boneSpeeds    = { 200, 280, 360, 440, 460 },
     boneCounts    = { 1, 1, 2, 3, 4 },
+    img = love.graphics.newImage("wendigo.png"),
+    defeat = false,
 
     draw = function (self)
-        if self.life > 0 then
+        if self.life > 0 and self.defeat == false then
             love.graphics.setColor(0.96, 0.12, 0.21)
-            love.graphics.circle("fill", self.x, self.y, self.radius)
+            local scaleX = 512 / self.img:getWidth()
+            local scaleY = 512 / self.img:getHeight()
+            love.graphics.draw(self.img, self.x, self.y, 0, scaleX, scaleY, self.img:getWidth()/2, self.img:getHeight()/2)
             love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 200, love.graphics.getHeight() / 2 - 100, 400, 400)
             love.graphics.setColor(1, 1, 1)
         end
@@ -85,7 +89,7 @@ local Boss = {
 
             if b.x < player.x + 50 and b.x + b.w > player.x and
                    b.y < player.y + 50 and b.y + b.h > player.y then
-                player.life = player.life - 1
+                player.life = player.life - 10
                 table.remove(self.bones, i)
             end
         end
