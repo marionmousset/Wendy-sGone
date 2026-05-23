@@ -19,7 +19,17 @@ function Player.new(x, y, imagePlayer)
     self.bulletsMax = 10
     self.bulletsLeft = 10
     self.reloading = false
+    self.alcohol = 20
+    self.flashTimer = 0
+    self.flashInterval = 3
+    self.flashAlpha = 0
+    self.imageBoss = love.graphics.newImage("skull.png")
+    self.isBossFight = false
     return self
+end
+
+function Player.setBossFight(player, active)
+    player.isBossFight = active
 end
 
 function Player.interaction(player)
@@ -124,8 +134,16 @@ function Player.drawBullets()
 end
 
 function Player.draw(player)
+    local img
+    if player.isBossFight then
+        img = player.imageBoss
+        player.scaleX = 64 / img:getWidth()
+        player.scaleY = 64 / img:getHeight()
+    else
+        img = player.image
+    end
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(player.image, player.x, player.y, 0, player.scaleX, player.scaleY, player.image:getWidth()/2, player.image:getHeight()/2)
+    love.graphics.draw(img, player.x, player.y, 0, player.scaleX, player.scaleY, img:getWidth()/2, img:getHeight()/2)
     -- love.graphics.setColor(0.2, 0.7, 1)
     -- love.graphics.rectangle("fill", player.x, player.y, 50, 50)
     if (interactionActivated == true) then
@@ -133,14 +151,19 @@ function Player.draw(player)
         love.graphics.print(message, 100, 100)
     end
     love.graphics.setColor(1, 1, 1)
-    if (player.facing == "right") then
-        love.graphics.circle("fill", player.x + 50, player.y + 25, 25)
-    elseif (player.facing == "left") then
-        love.graphics.circle("fill", player.x, player.y + 25, 25)
-    elseif (player.facing == "up") then
-        love.graphics.circle("fill", player.x + 25, player.y, 25)
-    elseif (player.facing == "down") then
-        love.graphics.circle("fill", player.x + 25, player.y + 50, 25)
+    -- if (player.facing == "right") then
+    --     love.graphics.circle("fill", player.x + 50, player.y + 25, 25)
+    -- elseif (player.facing == "left") then
+    --     love.graphics.circle("fill", player.x, player.y + 25, 25)
+    -- elseif (player.facing == "up") then
+    --     love.graphics.circle("fill", player.x + 25, player.y, 25)
+    -- elseif (player.facing == "down") then
+    --     love.graphics.circle("fill", player.x + 25, player.y + 50, 25)
+    -- end
+    if player.flashAlpha > 0 then
+        love.graphics.setColor(1, 1, 1, player.flashAlpha)
+        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+        love.graphics.setColor(1, 1, 1, 1)
     end
     love.graphics.setColor(1, 1, 1)
 end

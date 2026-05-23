@@ -2,12 +2,15 @@ local Player = require("player") -- charge player.lua
 local Enemy = require("src/enemy") -- charge enemy.lua
 local Boss = require("src/boss") -- charge boss.lua
 local Intro  = require("intro")
+local Items = require("src/items")
 
 local player
 
 local enemies = {}
 
 local boss
+
+local items = {}
 
 local game = {
     difficulty = 1,
@@ -26,6 +29,8 @@ local function startGame()
     boss = Boss
     enemies = {}
     table.insert(enemies, 1, Enemy())
+    table.insert(items, Item("alcohol", 300, 300))
+    table.insert(items, Item("pill", 500, 400))
 end
 
 function love.load()
@@ -47,6 +52,33 @@ function love.update(dt)
 
     local bullets = Player.getBullets()
 
+    for i = #items, 1, -1 do
+        local item = items[i]
+        if not item.collected and item:checkPickup(player.x, player.y) then
+            if item.type == "alcohol" then
+                player.alcohol = math.min(100, player.alcohol + 20)
+            elseif item.type == "pill" then
+                player.alcohol = math.max(0, player.alcohol - 20)
+            end
+            item.collected = true
+            table.remove(items, i)
+        end
+    end
+
+    if player.alcohol < 30 then
+        player.flashTimer = player.flashTimer + dt
+        if player.flashTimer >= player.flashInterval then
+            player.flashAlpha = 1
+            player.flashInterval = 4 + (player.alcohol / 30) * 5
+            player.flashTimer = 0
+        end
+    end
+
+    if player.flashAlpha > 0 then
+        player.flashAlpha = player.flashAlpha - dt * 3
+        if player.flashAlpha < 0 then player.flashAlpha = 0 end
+    end
+
     for i = #enemies, 1, -1 do
         enemies[i]:move(player.x, player.y, dt)
 
@@ -65,6 +97,9 @@ function love.update(dt)
     end
     if #enemies == 0 then
         boss.active = true
+
+        boss.active = true
+        Player.setBossFight(player, true)
 
         Player.update(player, dt)
 
@@ -97,6 +132,10 @@ function love.draw()
             boss:draw()
             boss:drawBones()
         end
+        for _, item in ipairs(items) do
+            item:draw()
+        end
+        love.graphics.print("Alcoolémie: " .. player.alcohol .. "%", 10, 30)
     end
 end
 
