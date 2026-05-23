@@ -37,6 +37,8 @@ function love.update(dt)
     for i = #enemies, 1, -1 do
         enemies[i]:move(player.x, player.y, dt)
 
+        Player.touchingEnemy(player, enemies[i], dt)
+
         for j = #bullets, 1, -1 do
             if enemies[i]:hit(bullets[j].x, bullets[j].y) then
                 table.remove(bullets, j)
