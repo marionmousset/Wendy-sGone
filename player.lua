@@ -170,11 +170,11 @@ function Player.draw(player)
     -- elseif (player.facing == "down") then
     --     love.graphics.circle("fill", player.x + 25, player.y + 50, 25)
     -- end
-    if player.flashAlpha > 0 then
-        love.graphics.setColor(1, 1, 1, player.flashAlpha)
-        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
-        love.graphics.setColor(1, 1, 1, 1)
-    end
+    -- if player.flashAlpha > 0 then
+    --     love.graphics.setColor(1, 1, 1, player.flashAlpha)
+    --     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    --     love.graphics.setColor(1, 1, 1, 1)
+    -- end
     love.graphics.setColor(1, 1, 1)
 end
 

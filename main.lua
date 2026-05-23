@@ -1,7 +1,7 @@
-local Player = require("player") -- charge player.lua
-local Enemy = require("src/enemy") -- charge enemy.lua
-local Boss = require("src/boss") -- charge boss.lua
-local Intro  = require("intro")
+local Player = require("player")
+local Enemy = require("src/enemy")
+local Boss = require("src/boss")
+local Intro = require("intro")
 local Item = require("src/items")
 local Checkpoint = require("checkpoint")
 local Map = require("map")
@@ -41,7 +41,7 @@ local function startGame()
     camera = Camera.new(imageMap:getWidth() * 2, imageMap:getHeight() * 2)
 
     local imageTree = love.graphics.newImage("tree.png")
-    Tree.load(imageTree, imageMap)  -- <-- passe imageMap ici
+    Tree.load(imageTree, imageMap)
 
     local imageBoots = love.graphics.newImage("boots.png")
     local imageFrogHat = love.graphics.newImage("froghat.png")
@@ -122,9 +122,7 @@ function love.update(dt)
 
     if #enemies == 0 then
         boss.active = true
-
         Player.setBossFight(player, true)
-
         Player.update(player, dt)
         local left   = love.graphics.getWidth() / 2 - 200
         local right  = love.graphics.getWidth() / 2 + 200 - 50
@@ -140,7 +138,7 @@ function love.update(dt)
 
     if player.life <= 0 then
         local checkpoints = {checkpointBoots, checkpointFrogHat, checkpointBackpack, checkpointPlush}
-        local respawn = {x = 100, y = 100}  -- position de départ par défaut
+        local respawn = {x = 100, y = 100}
         for i = 1, checkpointsData.count do
             local cp = checkpoints[i]
             if cp then
@@ -187,20 +185,20 @@ function love.draw()
                 boss:draw()
                 boss:drawBones()
             end
+            for _, item in ipairs(items) do
+                item:draw()
+            end
         Camera.detach()
+
+        -- flash overlay plein écran
+        if player.flashAlpha > 0 then
+            love.graphics.setColor(1, 1, 1, player.flashAlpha)
+            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+            love.graphics.setColor(1, 1, 1, 1)
+        end
 
         -- UI fixe hors caméra
         love.graphics.print("Balles: " .. player.bulletsLeft .. " / " .. player.bulletsMax, 10, 10)
-        for i = 1, #enemies do
-            enemies[i]:draw()
-        end
-        if boss and boss.active then
-            boss:draw()
-            boss:drawBones()
-        end
-        for _, item in ipairs(items) do
-            item:draw()
-        end
         love.graphics.print("Alcoolémie: " .. player.alcohol .. "%", 10, 30)
     end
 
