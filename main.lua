@@ -1,13 +1,19 @@
 local Player = require("player")
 local Enemy = require("src/enemy")
 local Boss = require("src/boss")
-local Intro  = require("intro")
-local Items = require("src/items")
+local Intro = require("intro")
+local Item = require("src/items")
 local Checkpoint = require("checkpoint")
+local Map = require("map")
+local Camera = require("camera")
+local Tree = require("tree")
 
 local player
 local enemies = {}
 local boss
+local map
+local camera
+
 local items = {}
 local checkpointBoots
 local checkpointFrogHat
@@ -54,17 +60,32 @@ local function startGame()
     local image = love.graphics.newImage("player.png")
     player = Player.new(100, 100, image)
 
+    local imageMap = love.graphics.newImage("map.png")
+    map = Map.new(imageMap)
+    camera = Camera.new(imageMap:getWidth() * 2, imageMap:getHeight() * 2)
+
+    local imageTree = love.graphics.newImage("tree.png")
+    Tree.load(imageTree, imageMap)
+
     local imageBoots = love.graphics.newImage("boots.png")
     local imageFrogHat = love.graphics.newImage("froghat.png")
     local imageBackpack = love.graphics.newImage("backpack.png")
     local imagePlush = love.graphics.newImage("plush.png")
-    checkpointBoots = Checkpoint.new(100, 100, imageBoots)
-    checkpointFrogHat = Checkpoint.new(300, 300, imageFrogHat)
-    checkpointBackpack = Checkpoint.new(500, 500, imageBackpack)
-    checkpointPlush = Checkpoint.new(700, 700, imagePlush)
+    checkpointBoots = Checkpoint.new(2800, 800, imageBoots)
+    checkpointFrogHat = Checkpoint.new(1200, 1820, imageFrogHat)
+    checkpointBackpack = Checkpoint.new(2800, 2850, imageBackpack)
+    checkpointPlush = Checkpoint.new(1200, 3300, imagePlush)
 
     boss = Boss
     enemies = {}
+    local spawnPoints = {
+        {500, 500}, {800, 500}, {1200, 500}, {1600, 500},
+        {2000, 500}, {2400, 500}, {3000, 500}, {3400, 500},
+        {1500, 1400}, {2500, 1400}, {1000, 2500}, {2000, 2500},
+    }
+    for _, pos in ipairs(spawnPoints) do
+        table.insert(enemies, Enemy(pos[1], pos[2]))
+    end
     table.insert(enemies, 1, Enemy())
     table.insert(items, Item("alcohol", 300, 300))
     table.insert(items, Item("pill", 500, 400))
@@ -101,6 +122,7 @@ function love.update(dt)
     if not game.state["running"] then return end
     Player.update(player, dt)
     Player.updateBullets(dt)
+    Tree.checkCollision(player)
 
     local bullets = Player.getBullets()
 
@@ -162,9 +184,42 @@ function love.update(dt)
     end
 
     if player.life <= 0 then
-        game.state["running"] = false
-        game.state["ended"] = true
+        if boss and boss.active then
+            game.state["running"] = false
+            game.state["ended"] = true
+        else
+            local checkpoints = {checkpointBoots, checkpointFrogHat, checkpointBackpack, checkpointPlush}
+            local respawn = {x = 100, y = 100}
+            for i = 1, checkpointsData.count do
+                local cp = checkpoints[i]
+                if cp then
+                    respawn.x = cp.x
+                    respawn.y = cp.y
+                end
+            end
+            player.x = respawn.x
+            player.y = respawn.y
+            player.life = 50
+            player.damageCooldown = 0
+        end
     end
+    -- if player.life <= 0 then
+    --     local checkpoints = {checkpointBoots, checkpointFrogHat, checkpointBackpack, checkpointPlush}
+    --     local respawn = {x = 100, y = 100}
+    --     for i = 1, checkpointsData.count do
+    --         local cp = checkpoints[i]
+    --         if cp then
+    --             respawn.x = cp.x
+    --             respawn.y = cp.y
+    --         end
+    --     end
+    --     player.x = respawn.x
+    --     player.y = respawn.y
+    --     player.life = 50
+    --     player.damageCooldown = 0
+    -- end
+
+    Camera.update(camera, player.x, player.y)
 end
 
 function love.draw()
@@ -193,6 +248,44 @@ function love.draw()
         for _, item in ipairs(items) do
             item:draw()
         end
+        Camera.attach(camera)
+            Map.draw(map)
+            Tree.draw()
+            Player.draw(player)
+            Player.drawBullets()
+            if checkpointBackpack.show then
+                Checkpoint.draw(checkpointBackpack)
+            end
+            if checkpointPlush.show then
+                Checkpoint.draw(checkpointPlush)
+            end
+            if checkpointBoots.show then
+                Checkpoint.draw(checkpointBoots)
+            end
+            if checkpointFrogHat.show then
+                Checkpoint.draw(checkpointFrogHat)
+            end
+            for i = 1, #enemies do
+                enemies[i]:draw()
+            end
+            if boss and boss.active then
+                boss:draw()
+                boss:drawBones()
+            end
+            for _, item in ipairs(items) do
+                item:draw()
+            end
+        Camera.detach()
+
+        -- flash overlay plein écran
+        if player.flashAlpha > 0 then
+            love.graphics.setColor(1, 1, 1, player.flashAlpha)
+            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+            love.graphics.setColor(1, 1, 1, 1)
+        end
+
+        -- UI fixe hors caméra
+        love.graphics.print("Balles: " .. player.bulletsLeft .. " / " .. player.bulletsMax, 10, 10)
         love.graphics.print("Alcoolémie: " .. player.alcohol .. "%", 10, 30)
     end
 
