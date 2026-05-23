@@ -16,6 +16,9 @@ function Player.new(x, y, imagePlayer)
     self.scaleY = 128 / self.image:getHeight()
     self.life = 50
     self.damageCooldown = 0
+    self.bulletsMax = 10
+    self.bulletsLeft = 10
+    self.reloading = false
     return self
 end
 
@@ -24,22 +27,40 @@ function Player.interaction(player)
     -- interaction
 end
 
-function Player.shoot(player)
-    local dirX, dirY = 0, 0
-    local bx = player.x + 25  -- centre du joueur
-    local by = player.y + 25
+function Player.reload(player)
+    if player.reloading then return end
+    player.bulletsLeft = player.bulletsMax
+end
 
-    if player.facing == "right" then dirX = 1
-    elseif player.facing == "left" then dirX = -1
-    elseif player.facing == "down" then dirY = 1
-    elseif player.facing == "up" then dirY = -1
+function Player.shoot(player)
+    if player.bulletsLeft <= 0 or player.reloading then return end
+
+    local baseAngles = {
+        right = 0,
+        left  = math.pi,
+        down  = math.pi / 2,
+        up    = -math.pi / 2
+    }
+
+    local angle = baseAngles[player.facing]
+    local spread = math.rad(20)
+
+    local angles = {
+        angle - spread,
+        angle,
+        angle + spread
+    }
+
+    for _, a in ipairs(angles) do
+        table.insert(bullets, {
+            x = player.x,
+            y = player.y,
+            dx = math.cos(a) * 400,
+            dy = math.sin(a) * 400
+        })
     end
 
-    table.insert(bullets, {
-        x = bx, y = by,
-        dx = dirX * 400,
-        dy = dirY * 400
-    })
+    player.bulletsLeft = player.bulletsLeft - 1
 end
 
 function Player.updateBullets(dt)
@@ -47,7 +68,7 @@ function Player.updateBullets(dt)
         local b = bullets[i]
         b.x = b.x + b.dx * dt
         b.y = b.y + b.dy * dt
-        if b.x < 0 or b.x > 800 or b.y < 0 or b.y > 600 then
+        if b.x < 0 or b.x > 1920 or b.y < 0 or b.y > 1080 then
             table.remove(bullets, i)
         end
     end

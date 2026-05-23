@@ -73,6 +73,7 @@ function love.draw()
     if game.state["running"] then
         Player.draw(player)
         Player.drawBullets()
+        love.graphics.print("Balles: " .. player.bulletsLeft .. " / " .. player.bulletsMax, 10, 10)
         for i = 1, #enemies do
             enemies[i]:draw()
         end
@@ -90,5 +91,9 @@ function love.keypressed(key)
 
     if key == "space" then
         Player.shoot(player)
+    end
+
+    if key == "r" then
+        Player.reload(player)
     end
 end
