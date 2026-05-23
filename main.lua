@@ -1,9 +1,12 @@
 local Player = require("player") -- charge player.lua
 local Enemy = require("src/enemy") -- charge enemy.lua
+local Boss = require("src/boss") -- charge boss.lua
 
 local player
 
 local enemies = {}
+
+local boss
 
 local game = {
     difficulty = 1,
@@ -18,6 +21,8 @@ local game = {
 function love.load()
     player = Player.new(100, 100) -- x, y
 
+    boss = Boss
+
     table.insert(enemies, 1, Enemy());
 end
 
@@ -28,6 +33,7 @@ function love.update(dt)
     for i = 1, #enemies do
         enemies[i]:move(player.x, player.y)
     end
+    boss:move(player.x, player.y)
 end
 
 function love.draw()
@@ -37,5 +43,6 @@ function love.draw()
         for i = 1, #enemies do
             enemies[i]:draw()
         end
+        boss:draw()
     end
 end

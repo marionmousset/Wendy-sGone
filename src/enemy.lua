@@ -4,6 +4,7 @@ function Enemy()
     return {
         level = 1,
         radius = 20,
+        life = 10,
         x = -10,
         y = -50,
 
@@ -22,9 +23,23 @@ function Enemy()
         end,
 
         draw = function (self)
-            love.graphics.setColor(1, 0.5, 0.7)
-            love.graphics.circle("fill", self.x, self.y, self.radius)
-            love.graphics.setColor(1, 1, 1)
+            if self.life > 0 then
+                love.graphics.setColor(1, 0.5, 0.7)
+                love.graphics.circle("fill", self.x, self.y, self.radius)
+                love.graphics.setColor(1, 1, 1)
+            end
+        end,
+
+        hit = function (self, bullet_x, bullet_y)
+            if bullet_x - (self.x + self.radius) == 0 then -- when the bullet comes from the right
+                self.life = self.life - 1
+            elseif bullet_x + (self.x - self.radius) == 0 then --when the bullet comes from the left
+                self.life = self.life - 1
+            elseif bullet_y - (self.y - self.radius) == 0 then  --when the bullet the bottom
+                self.life = self.life - 1
+            elseif bullet_y + (self.y + self.radius) == 0 then --when the bullet comes from the top
+                self.life = self.life - 1
+            end
         end,
     }
 end
