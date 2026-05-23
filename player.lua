@@ -9,7 +9,7 @@ function Player.new(x, y, imagePlayer)
     local self = {}
     self.x = x
     self.y = y
-    self.speed = 200 -- pixels per seconds
+    self.speed = 400 -- pixels per seconds
     self.facing  = "right"
     self.image = imagePlayer
     self.scaleX = 128 / self.image:getWidth()
@@ -32,7 +32,7 @@ function Player.interaction(player, checkpointBackpack, checkpointBoots, checkpo
         if distance < 60 then
             print("checkpoint atteint !")
             cp.show = false
-            checkpointsData.count = checkpointsData + 1
+            checkpointsData.count = checkpointsData.count + 1
         end
     end
 end
@@ -78,7 +78,7 @@ function Player.updateBullets(dt)
         local b = bullets[i]
         b.x = b.x + b.dx * dt
         b.y = b.y + b.dy * dt
-        if b.x < 0 or b.x > 1920 or b.y < 0 or b.y > 1080 then
+        if b.x < -100 or b.x > 4000 or b.y < -100 or b.y > 4500 then
             table.remove(bullets, i)
         end
     end
