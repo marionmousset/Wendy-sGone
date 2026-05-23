@@ -19,7 +19,8 @@ local game = {
 }
 
 function love.load()
-    player = Player.new(100, 100) -- x, y
+    local image = love.graphics.newImage("player.png")
+    player = Player.new(100, 100, image)
 
     boss = Boss
 
