@@ -1,6 +1,7 @@
 local Player = require("player") -- charge player.lua
 local Enemy = require("src/enemy") -- charge enemy.lua
 local Boss = require("src/boss") -- charge boss.lua
+local Intro  = require("intro")
 
 local player
 
@@ -13,22 +14,34 @@ local game = {
     state = {
         menu = false,
         paused = false,
-        running = true,
+        running = false,
         ended = false,
     }
 }
 
-function love.load()
-    love.window.setMode(1920, 1080)
+local function startGame()
+    game.state["running"] = true
     local image = love.graphics.newImage("player.png")
     player = Player.new(100, 100, image)
-
     boss = Boss
+    enemies = {}
+    table.insert(enemies, 1, Enemy())
+end
 
-    table.insert(enemies, 1, Enemy());
+function love.load()
+    Intro.load()
 end
 
 function love.update(dt)
+    if Intro.isActive() then
+        Intro.update(dt)
+    end
+    -- Transition to gameplay the frame the intro finishes
+    if Intro.isDone() and not game.state["running"] then
+        startGame()
+    end
+
+    if not game.state["running"] then return end
     Player.update(player, dt)
     Player.updateBullets(dt)
 
@@ -69,7 +82,10 @@ function love.update(dt)
 end
 
 function love.draw()
-    -- player draw
+    if Intro.isActive() then
+        Intro.draw()
+        return
+    end
     if game.state["running"] then
         Player.draw(player)
         Player.drawBullets()
@@ -85,6 +101,10 @@ function love.draw()
 end
 
 function love.keypressed(key)
+    if Intro.isActive() then
+        Intro.keypressed(key)
+        return
+    end
     if key == "e" then
         Player.interaction(player)
     end
