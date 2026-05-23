@@ -1,16 +1,16 @@
 local Player = {}
 
-local message = "interaction !"
+local message = ""
 local interactionActivated = false
-
 local bullets = {}
+local shotgunSound = love.audio.newSource("sound_shotgun.mp3", "static")
 
 function Player.new(x, y, imagePlayer)
     local self = {}
     self.x = x
     self.y = y
-    self.speed = 400 -- pixels per seconds
-    self.facing  = "right"
+    self.speed = 400
+    self.facing = "right"
     self.image = imagePlayer
     self.scaleX = 128 / self.image:getWidth()
     self.scaleY = 128 / self.image:getHeight()
@@ -40,7 +40,6 @@ function Player.interaction(player, checkpointBackpack, checkpointBoots, checkpo
         local dy = player.y - cp.y
         local distance = math.sqrt(dx * dx + dy * dy)
         if distance < 60 then
-            print("checkpoint atteint !")
             cp.show = false
             checkpointsData.count = checkpointsData.count + 1
         end
@@ -64,7 +63,6 @@ function Player.shoot(player)
 
     local angle = baseAngles[player.facing]
     local spread = math.rad(20)
-
     local angles = {
         angle - spread,
         angle,
@@ -81,6 +79,7 @@ function Player.shoot(player)
     end
 
     player.bulletsLeft = player.bulletsLeft - 1
+    shotgunSound:clone():play()
 end
 
 function Player.updateBullets(dt)
@@ -95,16 +94,15 @@ function Player.updateBullets(dt)
 end
 
 function Player.touchingEnemy(player, enemy, dt)
-    local px = player.x  -- déjà le centre car image centrée
+    local px = player.x
     local py = player.y
     local dx = px - enemy.x
     local dy = py - enemy.y
     local distance = math.sqrt(dx * dx + dy * dy)
-    if distance < enemy.radius + 30 then  -- rayon ennemi + rayon joueur
+    if distance < enemy.radius + 30 then
         if player.damageCooldown <= 0 then
             player.life = player.life - 10
             player.damageCooldown = 1
-            print("TOUCHE ! life: " .. player.life)
         end
         return true
     end
@@ -116,21 +114,19 @@ function Player.update(player, dt)
         player.damageCooldown = player.damageCooldown - dt
     end
 
-    -- gauche / droite
     if love.keyboard.isDown("d") then
         player.x = player.x + player.speed * dt
         player.facing = "right"
     elseif love.keyboard.isDown("q") then
-        player.x = player.x - player.speed *dt
+        player.x = player.x - player.speed * dt
         player.facing = "left"
     end
 
-    -- bas / haut
     if love.keyboard.isDown("s") then
         player.y = player.y + player.speed * dt
         player.facing = "down"
     elseif love.keyboard.isDown("z") then
-        player.y = player.y - player.speed *dt
+        player.y = player.y - player.speed * dt
         player.facing = "up"
     end
 end
@@ -154,27 +150,10 @@ function Player.draw(player)
     end
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(img, player.x, player.y, 0, player.scaleX, player.scaleY, img:getWidth()/2, img:getHeight()/2)
-    -- love.graphics.setColor(0.2, 0.7, 1)
-    -- love.graphics.rectangle("fill", player.x, player.y, 50, 50)
-    if (interactionActivated == true) then
+    if interactionActivated == true then
         love.graphics.setColor(1, 1, 1)
         love.graphics.print(message, 100, 100)
     end
-    love.graphics.setColor(1, 1, 1)
-    -- if (player.facing == "right") then
-    --     love.graphics.circle("fill", player.x + 50, player.y + 25, 25)
-    -- elseif (player.facing == "left") then
-    --     love.graphics.circle("fill", player.x, player.y + 25, 25)
-    -- elseif (player.facing == "up") then
-    --     love.graphics.circle("fill", player.x + 25, player.y, 25)
-    -- elseif (player.facing == "down") then
-    --     love.graphics.circle("fill", player.x + 25, player.y + 50, 25)
-    -- end
-    -- if player.flashAlpha > 0 then
-    --     love.graphics.setColor(1, 1, 1, player.flashAlpha)
-    --     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
-    --     love.graphics.setColor(1, 1, 1, 1)
-    -- end
     love.graphics.setColor(1, 1, 1)
 end
 
