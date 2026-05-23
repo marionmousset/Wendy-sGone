@@ -27,14 +27,38 @@ function love.load()
 end
 
 function love.update(dt)
-    -- player update
     Player.update(player, dt)
     Player.updateBullets(dt)
 
-    for i = 1, #enemies do
-        enemies[i]:move(player.x, player.y)
+    local bullets = Player.getBullets()
+
+    for i = #enemies, 1, -1 do
+        enemies[i]:move(player.x, player.y, dt)
+
+        for j = #bullets, 1, -1 do
+            if enemies[i]:hit(bullets[j].x, bullets[j].y) then
+                table.remove(bullets, j)
+                break
+            end
+        end
+
+        if enemies[i].life <= 0 then
+            table.remove(enemies, i)
+        end
     end
-    boss:move(player.x, player.y)
+
+    for i = #bullets, 1, -1 do
+        if boss and boss:hit(bullets[i].x, bullets[i].y) then
+            table.remove(bullets, i)
+            break
+        end
+        if boss and boss.life == 0 then
+            boss = nil
+        end
+    end
+    if boss then
+        boss:move(player.x, player.y, dt)
+    end
 end
 
 function love.draw()
@@ -45,7 +69,9 @@ function love.draw()
         for i = 1, #enemies do
             enemies[i]:draw()
         end
-        boss:draw()
+        if boss then
+            boss:draw()
+        end
     end
 end
 
