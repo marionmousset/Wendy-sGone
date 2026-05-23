@@ -22,9 +22,19 @@ function Player.new(x, y, imagePlayer)
     return self
 end
 
-function Player.interaction(player)
+function Player.interaction(player, checkpointBackpack, checkpointBoots, checkpointFrogHat, checkpointPlush, checkpointsData)
     interactionActivated = true
-    -- interaction
+    local checkpoints = {checkpointBackpack, checkpointBoots, checkpointFrogHat, checkpointPlush}
+    for _, cp in ipairs(checkpoints) do
+        local dx = player.x - cp.x
+        local dy = player.y - cp.y
+        local distance = math.sqrt(dx * dx + dy * dy)
+        if distance < 60 then
+            print("checkpoint atteint !")
+            cp.show = false
+            checkpointsData.count = checkpointsData + 1
+        end
+    end
 end
 
 function Player.reload(player)
