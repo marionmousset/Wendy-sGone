@@ -14,6 +14,8 @@ function Player.new(x, y, imagePlayer)
     self.image = imagePlayer
     self.scaleX = 128 / self.image:getWidth()
     self.scaleY = 128 / self.image:getHeight()
+    self.life = 50
+    self.damageCooldown = 0
     return self
 end
 
@@ -41,7 +43,6 @@ function Player.shoot(player)
 end
 
 function Player.updateBullets(dt)
-    print("nb balles: " .. #bullets)
     for i = #bullets, 1, -1 do
         local b = bullets[i]
         b.x = b.x + b.dx * dt
@@ -52,7 +53,28 @@ function Player.updateBullets(dt)
     end
 end
 
+function Player.touchingEnemy(player, enemy, dt)
+    local px = player.x  -- déjà le centre car image centrée
+    local py = player.y
+    local dx = px - enemy.x
+    local dy = py - enemy.y
+    local distance = math.sqrt(dx * dx + dy * dy)
+    if distance < enemy.radius + 30 then  -- rayon ennemi + rayon joueur
+        if player.damageCooldown <= 0 then
+            player.life = player.life - 10
+            player.damageCooldown = 1
+            print("TOUCHE ! life: " .. player.life)
+        end
+        return true
+    end
+    return false
+end
+
 function Player.update(player, dt)
+    if player.damageCooldown > 0 then
+        player.damageCooldown = player.damageCooldown - dt
+    end
+
     -- gauche / droite
     if love.keyboard.isDown("d") then
         player.x = player.x + player.speed * dt
