@@ -20,7 +20,33 @@ function Player.interaction(player)
 end
 
 function Player.shoot(player)
+    local dirX, dirY = 0, 0
+    local bx = player.x + 25  -- centre du joueur
+    local by = player.y + 25
 
+    if player.facing == "right" then dirX = 1
+    elseif player.facing == "left" then dirX = -1
+    elseif player.facing == "down" then dirY = 1
+    elseif player.facing == "up" then dirY = -1
+    end
+
+    table.insert(bullets, {
+        x = bx, y = by,
+        dx = dirX * 400,
+        dy = dirY * 400
+    })
+end
+
+function Player.updateBullets(dt)
+    print("nb balles: " .. #bullets)
+    for i = #bullets, 1, -1 do
+        local b = bullets[i]
+        b.x = b.x + b.dx * dt
+        b.y = b.y + b.dy * dt
+        if b.x < 0 or b.x > 800 or b.y < 0 or b.y > 600 then
+            table.remove(bullets, i)
+        end
+    end
 end
 
 function Player.update(player, dt)
@@ -43,6 +69,14 @@ function Player.update(player, dt)
     end
 end
 
+function Player.drawBullets()
+    love.graphics.setColor(1, 1, 0)
+    for _, b in ipairs(bullets) do
+        love.graphics.circle("fill", b.x, b.y, 5)
+    end
+    love.graphics.setColor(1, 1, 1)
+end
+
 function Player.draw(player)
     love.graphics.setColor(0.2, 0.7, 1)
     love.graphics.rectangle("fill", player.x, player.y, 50, 50)
@@ -59,6 +93,7 @@ function Player.draw(player)
     elseif (player.facing == "down") then
         love.graphics.circle("fill", player.x + 25, player.y + 50, 25)
     end
+    love.graphics.setColor(1, 1, 1)
 end
 
 return Player

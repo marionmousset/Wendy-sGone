@@ -24,6 +24,7 @@ end
 function love.update(dt)
     -- player update
     Player.update(player, dt)
+    Player.updateBullets(dt)
 
     for i = 1, #enemies do
         enemies[i]:move(player.x, player.y)
@@ -34,6 +35,7 @@ function love.draw()
     -- player draw
     if game.state["running"] then
         Player.draw(player)
+        Player.drawBullets()
         for i = 1, #enemies do
             enemies[i]:draw()
         end
