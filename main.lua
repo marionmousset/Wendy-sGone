@@ -20,7 +20,8 @@ local game = {
 
 function love.load()
     love.window.setMode(1920, 1080)
-    player = Player.new(100, 100) -- x, y
+    local image = love.graphics.newImage("player.png")
+    player = Player.new(100, 100, image)
 
     boss = Boss
 
@@ -60,15 +61,8 @@ function love.update(dt)
         player.x = math.max(left, math.min(right,  player.x))
         player.y = math.max(top, math.min(bottom, player.y))
     end
-
-    for i = #bullets, 1, -1 do
-        if boss and boss.active and boss:fight(player.x, player.y) then
-            table.remove(bullets, i)
-            break
-        end
-        if boss and boss.life == 0 then
-            boss = nil
-        end
+    if boss and boss.active then
+        boss:updateBones(dt, player)
     end
 end
 
@@ -82,6 +76,7 @@ function love.draw()
         end
         if boss and boss.active then
             boss:draw()
+            boss:drawBones()
         end
     end
 end

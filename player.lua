@@ -5,12 +5,15 @@ local interactionActivated = false
 
 local bullets = {}
 
-function Player.new(x, y)
+function Player.new(x, y, imagePlayer)
     local self = {}
     self.x = x
     self.y = y
     self.speed = 200 -- pixels per seconds
     self.facing  = "right"
+    self.image = imagePlayer
+    self.scaleX = 128 / self.image:getWidth()
+    self.scaleY = 128 / self.image:getHeight()
     return self
 end
 
@@ -78,12 +81,15 @@ function Player.drawBullets()
 end
 
 function Player.draw(player)
-    love.graphics.setColor(0.2, 0.7, 1)
-    love.graphics.rectangle("fill", player.x, player.y, 50, 50)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(player.image, player.x, player.y, 0, player.scaleX, player.scaleY, player.image:getWidth()/2, player.image:getHeight()/2)
+    -- love.graphics.setColor(0.2, 0.7, 1)
+    -- love.graphics.rectangle("fill", player.x, player.y, 50, 50)
     if (interactionActivated == true) then
+        love.graphics.setColor(1, 1, 1)
         love.graphics.print(message, 100, 100)
     end
-
+    love.graphics.setColor(1, 1, 1)
     if (player.facing == "right") then
         love.graphics.circle("fill", player.x + 50, player.y + 25, 25)
     elseif (player.facing == "left") then
