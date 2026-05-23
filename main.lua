@@ -3,6 +3,7 @@ local Enemy = require("src/enemy") -- charge enemy.lua
 local Boss = require("src/boss") -- charge boss.lua
 local Intro  = require("intro")
 local Items = require("src/items")
+local Checkpoint = require("checkpoint")
 
 local player
 
@@ -11,6 +12,11 @@ local enemies = {}
 local boss
 
 local items = {}
+local checkpointBoots
+local checkpointFrogHat
+local checkpointBackpack
+local checkpointPlush
+local checkpointsData = { count = 0, total = 4 }
 
 local game = {
     difficulty = 1,
@@ -26,6 +32,16 @@ local function startGame()
     game.state["running"] = true
     local image = love.graphics.newImage("player.png")
     player = Player.new(100, 100, image)
+
+    local imageBoots = love.graphics.newImage("boots.png")
+    local imageFrogHat = love.graphics.newImage("froghat.png")
+    local imageBackpack = love.graphics.newImage("backpack.png")
+    local imagePlush = love.graphics.newImage("plush.png")
+    checkpointBoots = Checkpoint.new(100, 100, imageBoots)
+    checkpointFrogHat = Checkpoint.new(300, 300, imageFrogHat)
+    checkpointBackpack = Checkpoint.new(500, 500, imageBackpack)
+    checkpointPlush = Checkpoint.new(700, 700, imagePlush)
+
     boss = Boss
     enemies = {}
     table.insert(enemies, 1, Enemy())
@@ -34,6 +50,7 @@ local function startGame()
 end
 
 function love.load()
+    love.graphics.setDefaultFilter("linear", "linear")
     Intro.load()
 end
 
@@ -42,7 +59,7 @@ function love.update(dt)
         Intro.update(dt)
     end
     -- Transition to gameplay the frame the intro finishes
-    if Intro.isDone() and not game.state["running"] then
+    if Intro.isDone() and not game.state["running"] and not game.state["ended"] then
         startGame()
     end
 
@@ -114,6 +131,11 @@ function love.update(dt)
     if boss and boss.active then
         boss:updateBones(dt, player)
     end
+
+    if player.life <= 0 then
+        game.state["running"] = false
+        game.state["ended"] = true
+    end
 end
 
 function love.draw()
@@ -124,6 +146,18 @@ function love.draw()
     if game.state["running"] then
         Player.draw(player)
         Player.drawBullets()
+        if checkpointBackpack.show then
+            Checkpoint.draw(checkpointBackpack)
+        end
+        if checkpointPlush.show then
+            Checkpoint.draw(checkpointPlush)
+        end
+        if checkpointBoots.show then
+            Checkpoint.draw(checkpointBoots)
+        end
+        if checkpointFrogHat.show then
+            Checkpoint.draw(checkpointFrogHat)
+        end
         love.graphics.print("Balles: " .. player.bulletsLeft .. " / " .. player.bulletsMax, 10, 10)
         for i = 1, #enemies do
             enemies[i]:draw()
@@ -137,6 +171,10 @@ function love.draw()
         end
         love.graphics.print("Alcoolémie: " .. player.alcohol .. "%", 10, 30)
     end
+
+    if game.state["ended"] then
+        Player.draw(player)
+    end
 end
 
 function love.keypressed(key)
@@ -145,7 +183,7 @@ function love.keypressed(key)
         return
     end
     if key == "e" then
-        Player.interaction(player)
+        Player.interaction(player, checkpointBackpack, checkpointBoots, checkpointFrogHat, checkpointPlush, checkpointsData)
     end
 
     if key == "space" then
