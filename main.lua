@@ -1,7 +1,8 @@
-local Player = require("player")
-local Enemy = require("src/enemy")
-local Boss = require("src/boss")
-local Intro = require("intro")
+local Player = require("player") -- charge player.lua
+local Enemy = require("src/enemy") -- charge enemy.lua
+local Boss = require("src/boss") -- charge boss.lua
+local Intro  = require("intro")
+local Item = require("src/items")
 local Checkpoint = require("checkpoint")
 local Map = require("map")
 local Camera = require("camera")
@@ -13,6 +14,7 @@ local boss
 local map
 local camera
 
+local items = {}
 local checkpointBoots
 local checkpointFrogHat
 local checkpointBackpack
@@ -53,6 +55,8 @@ local function startGame()
     boss = Boss
     enemies = {}
     table.insert(enemies, 1, Enemy())
+    table.insert(items, Item("alcohol", 300, 300))
+    table.insert(items, Item("pill", 500, 400))
 end
 
 function love.load()
@@ -75,6 +79,33 @@ function love.update(dt)
 
     local bullets = Player.getBullets()
 
+    for i = #items, 1, -1 do
+        local item = items[i]
+        if not item.collected and item:checkPickup(player.x, player.y) then
+            if item.type == "alcohol" then
+                player.alcohol = math.min(100, player.alcohol + 20)
+            elseif item.type == "pill" then
+                player.alcohol = math.max(0, player.alcohol - 20)
+            end
+            item.collected = true
+            table.remove(items, i)
+        end
+    end
+
+    if player.alcohol < 30 then
+        player.flashTimer = player.flashTimer + dt
+        if player.flashTimer >= player.flashInterval then
+            player.flashAlpha = 1
+            player.flashInterval = 4 + (player.alcohol / 30) * 5
+            player.flashTimer = 0
+        end
+    end
+
+    if player.flashAlpha > 0 then
+        player.flashAlpha = player.flashAlpha - dt * 3
+        if player.flashAlpha < 0 then player.flashAlpha = 0 end
+    end
+
     for i = #enemies, 1, -1 do
         enemies[i]:move(player.x, player.y, dt)
         Player.touchingEnemy(player, enemies[i], dt)
@@ -91,6 +122,9 @@ function love.update(dt)
 
     if #enemies == 0 then
         boss.active = true
+
+        Player.setBossFight(player, true)
+
         Player.update(player, dt)
         local left   = love.graphics.getWidth() / 2 - 200
         local right  = love.graphics.getWidth() / 2 + 200 - 50
@@ -157,6 +191,17 @@ function love.draw()
 
         -- UI fixe hors caméra
         love.graphics.print("Balles: " .. player.bulletsLeft .. " / " .. player.bulletsMax, 10, 10)
+        for i = 1, #enemies do
+            enemies[i]:draw()
+        end
+        if boss and boss.active then
+            boss:draw()
+            boss:drawBones()
+        end
+        for _, item in ipairs(items) do
+            item:draw()
+        end
+        love.graphics.print("Alcoolémie: " .. player.alcohol .. "%", 10, 30)
     end
 
     if game.state["ended"] then

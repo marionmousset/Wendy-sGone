@@ -1,5 +1,7 @@
 local love = require("love")
 
+local bossMusic = nil
+
 local Boss = {
     level = 1,
     radius = 30,
@@ -11,7 +13,7 @@ local Boss = {
     bones = {},
     phase = 1,
     phaseTimer = 0,
-    phaseDurations = { 8, 12, 15, 20, 25 },
+    phaseDurations = { 8, 12, 15, 20, 70},
     boneTimer = 0,
     boneIntervals = { 1.9, 1.7, 1.5, 1, 0.5 },
     boneSpeeds    = { 200, 280, 360, 440, 460 },
@@ -32,6 +34,11 @@ local Boss = {
             self.phase = self.phase + 1
             self.phaseTimer = 0
             print("Phase " .. self.phase) -- debug
+            if self.phase == 5 then
+                bossMusic = love.audio.newSource("fightofyourlife.mp3", "stream")
+                bossMusic:setLooping(true)
+                love.audio.play(bossMusic)
+            end
         end
     end,
 
