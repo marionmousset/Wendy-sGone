@@ -19,6 +19,7 @@ local game = {
 }
 
 function love.load()
+    love.window.setMode(1920, 1080)
     player = Player.new(100, 100) -- x, y
 
     boss = Boss
@@ -46,18 +47,28 @@ function love.update(dt)
             table.remove(enemies, i)
         end
     end
+    if #enemies == 0 then
+        boss.active = true
+
+        Player.update(player, dt)
+
+        local left   = love.graphics.getWidth() / 2 - 200
+        local right  = love.graphics.getWidth() / 2 + 200 - 50
+        local top    = love.graphics.getHeight() / 2 - 100
+        local bottom = love.graphics.getHeight() / 2 + 300 - 50
+
+        player.x = math.max(left, math.min(right,  player.x))
+        player.y = math.max(top, math.min(bottom, player.y))
+    end
 
     for i = #bullets, 1, -1 do
-        if boss and boss:hit(bullets[i].x, bullets[i].y) then
+        if boss and boss.active and boss:fight(player.x, player.y) then
             table.remove(bullets, i)
             break
         end
         if boss and boss.life == 0 then
             boss = nil
         end
-    end
-    if boss then
-        boss:move(player.x, player.y, dt)
     end
 end
 
@@ -69,7 +80,7 @@ function love.draw()
         for i = 1, #enemies do
             enemies[i]:draw()
         end
-        if boss then
+        if boss and boss.active then
             boss:draw()
         end
     end

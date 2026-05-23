@@ -7,11 +7,13 @@ local Boss = {
     x = 50,
     y = 50,
     speed = 100,
+    active = false,
 
     draw = function (self)
         if self.life > 0 then
             love.graphics.setColor(0.96, 0.12, 0.21)
             love.graphics.circle("fill", self.x, self.y, self.radius)
+            love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 200, love.graphics.getHeight() / 2 - 100, 400, 400)
             love.graphics.setColor(1, 1, 1)
         end
     end,
@@ -30,16 +32,8 @@ local Boss = {
         end
     end,
 
-    hit = function (self, bullet_x, bullet_y)
-        local dx = bullet_x - self.x
-        local dy = bullet_y - self.y
-        local distance = math.sqrt(dx * dx + dy * dy)
-
-        if distance < self.radius + 5 then
-            self.life = self.life - 1
-            return true
-        end
-        return false
+    fight = function (self, player_x, player_y)
+        
     end,
 }
 
