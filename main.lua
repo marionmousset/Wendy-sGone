@@ -54,6 +54,14 @@ local function startGame()
 
     boss = Boss
     enemies = {}
+    local spawnPoints = {
+        {500, 500}, {800, 500}, {1200, 500}, {1600, 500},
+        {2000, 500}, {2400, 500}, {3000, 500}, {3400, 500},
+        {1500, 1400}, {2500, 1400}, {1000, 2500}, {2000, 2500},
+    }
+    for _, pos in ipairs(spawnPoints) do
+        table.insert(enemies, Enemy(pos[1], pos[2]))
+    end
     table.insert(enemies, 1, Enemy())
     table.insert(items, Item("alcohol", 300, 300))
     table.insert(items, Item("pill", 500, 400))
