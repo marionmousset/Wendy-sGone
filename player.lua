@@ -96,4 +96,8 @@ function Player.draw(player)
     love.graphics.setColor(1, 1, 1)
 end
 
+function Player.getBullets()
+    return bullets
+end
+
 return Player

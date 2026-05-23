@@ -5,20 +5,21 @@ function Enemy()
         level = 1,
         radius = 20,
         life = 10,
-        x = -10,
-        y = -50,
+        x = 10,
+        y = 50,
+        speed = 50,
 
-        move = function (self, player_x, player_y)
+        move = function (self, player_x, player_y, dt)
             if player_x - self.x > 0 then
-                self.x = self.x + self.level
+                self.x = self.x + self.speed * dt
             elseif player_x - self.x < 0 then
-                self.x = self.x - self.level
+                self.x = self.x - self.speed * dt
             end
 
             if player_y - self.y > 0 then
-                self.y = self.y + self.level
+                self.y = self.y + self.speed * dt
             elseif player_y - self.y < 0 then
-                self.y = self.y - self.level
+                self.y = self.y - self.speed * dt
             end
         end,
 
@@ -31,15 +32,15 @@ function Enemy()
         end,
 
         hit = function (self, bullet_x, bullet_y)
-            if bullet_x - (self.x + self.radius) == 0 then -- when the bullet comes from the right
+            local dx = bullet_x - self.x
+            local dy = bullet_y - self.y
+            local distance = math.sqrt(dx * dx + dy * dy)
+
+            if distance < self.radius + 5 then
                 self.life = self.life - 1
-            elseif bullet_x + (self.x - self.radius) == 0 then --when the bullet comes from the left
-                self.life = self.life - 1
-            elseif bullet_y - (self.y - self.radius) == 0 then  --when the bullet the bottom
-                self.life = self.life - 1
-            elseif bullet_y + (self.y + self.radius) == 0 then --when the bullet comes from the top
-                self.life = self.life - 1
+                return true
             end
+            return false
         end,
     }
 end
